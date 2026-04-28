@@ -18,7 +18,10 @@ namespace BanVeXemPhim.Controllers
         {
             // Kiểm tra đăng nhập
             if (HttpContext.Session.GetString("UserId") == null)
-                return RedirectToAction("DangNhap", "Account", new { returnUrl = $"/DatVe/ChonGhe/{suatChieuId}" });
+            {
+                var returnUrl = Url.Action(nameof(ChonGhe), "DatVe", new { suatChieuId });
+                return RedirectToAction("DangNhap", "Account", new { returnUrl });
+            }
 
             var suatChieu = await _db.SuatChieus
                 .Include(s => s.Phim)

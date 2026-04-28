@@ -18,12 +18,8 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Tự động tạo database (Code-First) nếu chưa có - thuận tiện cho sinh viên
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.EnsureCreated();
-}
+// Khôi phục database từ TruongThanhTrungTiket.bak nếu chưa tồn tại
+DbInitializer.RestoreFromBackup(app.Environment.ContentRootPath);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
