@@ -1,0 +1,105 @@
+@model BanVeXemPhim.Models.Phim
+@{
+    ViewData["Title"] = Model.TenPhim;
+    var suatChieus = ViewBag.SuatChieus as List<BanVeXemPhim.Models.SuatChieu>;
+}
+
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Poster phim -->
+        <div class="col-md-4">
+            <img src="@Model.HinhAnh"
+                 alt="@Model.TenPhim" class="img-fluid rounded-3 shadow w-100" />
+        </div>
+
+        <!-- Thông tin phim -->
+        <div class="col-md-8">
+            <h1 class="fw-bold mb-2">@Model.TenPhim</h1>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="badge-theloai">@Model.TheLoai?.TenTheLoai</span>
+                @if (Model.TrangThai == "DangChieu")
+                {
+                    <span class="badge-trangThai-DangChieu">Đang chiếu</span>
+                }
+                else
+                {
+                    <span class="badge-trangThai-SapChieu">Sắp chiếu</span>
+                }
+            </div>
+
+            <table class="table table-borderless" style="max-width:500px">
+                <tr>
+                    <td class="text-muted" style="width:130px"><i class="fas fa-clock me-1"></i>Thời lượng</td>
+                    <td>@Model.ThoiLuong phút</td>
+                </tr>
+                <tr>
+                    <td class="text-muted"><i class="fas fa-user me-1"></i>Đạo diễn</td>
+                    <td>@(Model.DaoDien ?? "Chưa cập nhật")</td>
+                </tr>
+                <tr>
+                    <td class="text-muted"><i class="fas fa-users me-1"></i>Diễn viên</td>
+                    <td>@(Model.DienVien ?? "Chưa cập nhật")</td>
+                </tr>
+                <tr>
+                    <td class="text-muted"><i class="fas fa-calendar me-1"></i>Khởi chiếu</td>
+                    <td>@Model.NgayKhoiChieu.ToString("dd/MM/yyyy")</td>
+                </tr>
+                <tr>
+                    <td class="text-muted"><i class="fas fa-star me-1"></i>Năm SX</td>
+                    <td>@Model.NamSanXuat</td>
+                </tr>
+            </table>
+
+            <h6 class="text-muted mt-2">Nội dung phim</h6>
+            <p>@(Model.MoTa ?? "Chưa có mô tả.")</p>
+        </div>
+    </div>
+
+    <!-- Danh sách suất chiếu -->
+    <div class="mt-5">
+        <h2 class="section-title">🎟️ Lịch Chiếu</h2>
+        @if (suatChieus != null && suatChieus.Any())
+        {
+            <div class="row g-3">
+                @foreach (var suat in suatChieus)
+                {
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                    <strong>@suat.PhongChieu?.RapChieu?.TenRap</strong>
+                                </div>
+                                <div class="text-muted small mb-1">
+                                    <i class="fas fa-door-open me-1"></i>@suat.PhongChieu?.TenPhong
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div>
+                                        <div class="fw-bold">📅 @suat.NgayChieu.ToString("dd/MM/yyyy")</div>
+                                        <div class="text-muted">⏰ @suat.GioChieu.ToString(@"hh\:mm")</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-warning fw-bold">
+                                            @suat.GiaVe.ToString("N0") VNĐ
+                                        </div>
+                                        <a asp-controller="DatVe" asp-action="ChonGhe"
+                                           asp-route-suatChieuId="@suat.Id"
+                                           class="btn btn-primary btn-sm mt-1">
+                                            Chọn ghế 🪑
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-secondary">
+                <i class="fas fa-info-circle me-2"></i>Hiện chưa có suất chiếu nào cho phim này.
+            </div>
+        }
+    </div>
+</div>

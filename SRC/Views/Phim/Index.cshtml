@@ -1,0 +1,81 @@
+@model List<BanVeXemPhim.Models.Phim>
+@{
+    ViewData["Title"] = "Danh Sách Phim";
+    var theLoais = ViewBag.TheLoais as List<BanVeXemPhim.Models.TheLoai>;
+    int? theLoaiId = ViewBag.TheLoaiId;
+    string? tuKhoa = ViewBag.TuKhoa;
+}
+
+<div class="container py-4">
+    <h1 class="section-title">🎬 Danh Sách Phim</h1>
+
+    <!-- Bộ lọc -->
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-5">
+            <input type="text" name="tuKhoa" class="form-control" placeholder="🔍 Tìm kiếm phim..."
+                   value="@tuKhoa" />
+        </div>
+        <div class="col-md-4">
+            <select name="theLoaiId" class="form-select">
+                <option value="">-- Tất cả thể loại --</option>
+                @if (theLoais != null)
+                {
+                    foreach (var tl in theLoais)
+                    {
+                        <option value="@tl.Id" selected="@(theLoaiId == tl.Id)">@tl.TenTheLoai</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-search me-1"></i>Tìm kiếm
+            </button>
+        </div>
+    </form>
+
+    <!-- Danh sách phim -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-3">
+            @foreach (var phim in Model)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="phim-card">
+                        <a asp-action="ChiTiet" asp-route-id="@phim.Id" class="text-decoration-none">
+                            <img src="@phim.HinhAnh" alt="@phim.TenPhim" />
+                        </a>
+                        <div class="phim-card-body">
+                            <div class="phim-card-title">@phim.TenPhim</div>
+                            <div class="d-flex justify-content-between align-items-center mt-2 mb-3">
+                                <span class="badge-theloai">@phim.TheLoai?.TenTheLoai</span>
+                                @if (phim.TrangThai == "DangChieu")
+                                {
+                                    <span class="badge-trangThai-DangChieu">Đang chiếu</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-trangThai-SapChieu">Sắp chiếu</span>
+                                }
+                            </div>
+                            <small class="text-muted d-block mb-2">
+                                <i class="fas fa-clock me-1"></i>@phim.ThoiLuong phút
+                            </small>
+                            <a asp-action="ChiTiet" asp-route-id="@phim.Id"
+                               class="btn btn-primary btn-sm w-100">
+                                <i class="fas fa-info-circle me-1"></i>Chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-film fa-4x text-muted mb-3"></i>
+            <p class="text-muted">Không tìm thấy phim nào.</p>
+        </div>
+    }
+</div>

@@ -1,0 +1,131 @@
+@model List<BanVeXemPhim.Models.SuatChieu>
+@{
+    ViewData["Title"] = "Quản lý Suất Chiếu";
+    var phims = ViewBag.Phims as List<BanVeXemPhim.Models.Phim>;
+    var phongChieus = ViewBag.PhongChieus as List<BanVeXemPhim.Models.PhongChieu>;
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-2 admin-sidebar">
+            <h6 class="text-muted px-3 mb-3 text-uppercase small">Quản trị hệ thống</h6>
+            <nav class="nav flex-column">
+                <a class="nav-link" asp-controller="Dashboard" asp-action="Index"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+                <a class="nav-link" asp-controller="QuanLyPhim" asp-action="Index"><i class="fas fa-film me-2"></i>Quản lý Phim</a>
+                <a class="nav-link active" asp-controller="QuanLySuatChieu" asp-action="Index"><i class="fas fa-calendar-alt me-2"></i>Suất Chiếu</a>
+                <a class="nav-link" asp-controller="QuanLyTheLoai" asp-action="Index"><i class="fas fa-tags me-2"></i>Thể Loại</a>
+                <a class="nav-link" asp-controller="QuanLyVe" asp-action="Index"><i class="fas fa-ticket-alt me-2"></i>Quản lý Vé</a>
+                <hr style="border-color:#333" />
+                <a class="nav-link" asp-controller="Home" asp-action="Index"><i class="fas fa-home me-2"></i>Về trang chủ</a>
+            </nav>
+        </div>
+        <div class="col-md-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">📅 Quản Lý Suất Chiếu</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemSuat">
+                    <i class="fas fa-plus me-1"></i>Thêm suất chiếu
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Phim</th>
+                                    <th>Rạp - Phòng</th>
+                                    <th>Ngày chiếu</th>
+                                    <th>Giờ chiếu</th>
+                                    <th>Giá vé</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.Count; i++)
+                                {
+                                    var s = Model[i];
+                                    <tr>
+                                        <td>@(i + 1)</td>
+                                        <td>@s.Phim?.TenPhim</td>
+                                        <td>@s.PhongChieu?.RapChieu?.TenRap - @s.PhongChieu?.TenPhong</td>
+                                        <td>@s.NgayChieu.ToString("dd/MM/yyyy")</td>
+                                        <td>@s.GioChieu.ToString(@"hh\:mm")</td>
+                                        <td class="text-warning">@s.GiaVe.ToString("N0")</td>
+                                        <td>
+                                            <form method="post" asp-action="Xoa" class="d-inline"
+                                                  onsubmit="return confirm('Xóa suất chiếu này?')">
+                                                <input type="hidden" name="id" value="@s.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Suất Chiếu -->
+<div class="modal fade" id="modalThemSuat" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:#1e1e1e;border:1px solid #333;color:#e5e5e5">
+            <div class="modal-header" style="border-color:#333">
+                <h5 class="modal-title">➕ Thêm Suất Chiếu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-action="Them">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Phim</label>
+                        <select name="PhimId" class="form-select" required>
+                            <option value="">-- Chọn phim --</option>
+                            @if (phims != null)
+                            {
+                                foreach (var p in phims)
+                                { <option value="@p.Id">@p.TenPhim</option> }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phòng chiếu</label>
+                        <select name="PhongChieuId" class="form-select" required>
+                            <option value="">-- Chọn phòng --</option>
+                            @if (phongChieus != null)
+                            {
+                                foreach (var pc in phongChieus)
+                                { <option value="@pc.Id">@pc.RapChieu?.TenRap - @pc.TenPhong</option> }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ngày chiếu</label>
+                        <input type="date" name="NgayChieu" class="form-control"
+                               value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Giờ chiếu</label>
+                        <input type="time" name="GioChieu" class="form-control" value="09:00" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Giá vé (VNĐ)</label>
+                        <input type="number" name="GiaVe" class="form-control" value="90000" min="0" required />
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-color:#333">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

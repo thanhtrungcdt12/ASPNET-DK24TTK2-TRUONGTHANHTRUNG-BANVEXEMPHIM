@@ -1,0 +1,77 @@
+@model BanVeXemPhim.Models.Phim
+@{
+    ViewData["Title"] = "Sửa Phim";
+    var theLoais = ViewBag.TheLoais as List<BanVeXemPhim.Models.TheLoai>;
+}
+
+<div class="container py-4" style="max-width:700px">
+    <h2 class="fw-bold mb-4">✏️ Sửa Phim</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" asp-action="Sua">
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Tên phim <span class="text-danger">*</span></label>
+                        <input type="text" name="TenPhim" class="form-control"
+                               required value="@Model.TenPhim" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Thể loại</label>
+                        <select name="TheLoaiId" class="form-select">
+                            @if (theLoais != null)
+                            {
+                                foreach (var tl in theLoais)
+                                {
+                                    <option value="@tl.Id" selected="@(Model.TheLoaiId == tl.Id)">@tl.TenTheLoai</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Thời lượng (phút)</label>
+                        <input type="number" name="ThoiLuong" class="form-control" value="@Model.ThoiLuong" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Năm SX</label>
+                        <input type="number" name="NamSanXuat" class="form-control" value="@Model.NamSanXuat" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Đạo diễn</label>
+                        <input type="text" name="DaoDien" class="form-control" value="@Model.DaoDien" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Diễn viên</label>
+                        <input type="text" name="DienVien" class="form-control" value="@Model.DienVien" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Ngày khởi chiếu</label>
+                        <input type="date" name="NgayKhoiChieu" class="form-control"
+                               value="@Model.NgayKhoiChieu.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Trạng thái</label>
+                        <select name="TrangThai" class="form-select">
+                            <option value="DangChieu" selected="@(Model.TrangThai=="DangChieu")">Đang chiếu</option>
+                            <option value="SapChieu" selected="@(Model.TrangThai=="SapChieu")">Sắp chiếu</option>
+                            <option value="NgungChieu" selected="@(Model.TrangThai=="NgungChieu")">Ngừng chiếu</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Mô tả</label>
+                        <textarea name="MoTa" class="form-control" rows="3">@Model.MoTa</textarea>
+                    </div>
+                    <div class="col-12 d-flex gap-2 justify-content-end">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Hủy
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Cập nhật
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,78 @@
+@model BanVeXemPhim.Models.Phim
+@{
+    ViewData["Title"] = "Thêm Phim";
+    var theLoais = ViewBag.TheLoais as List<BanVeXemPhim.Models.TheLoai>;
+}
+
+<div class="container py-4" style="max-width:700px">
+    <h2 class="fw-bold mb-4">➕ Thêm Phim Mới</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" asp-action="Them">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Tên phim <span class="text-danger">*</span></label>
+                        <input type="text" name="TenPhim" class="form-control" required
+                               placeholder="Nhập tên phim" value="@Model?.TenPhim" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Thể loại <span class="text-danger">*</span></label>
+                        <select name="TheLoaiId" class="form-select" required>
+                            <option value="">-- Chọn thể loại --</option>
+                            @if (theLoais != null)
+                            {
+                                foreach (var tl in theLoais)
+                                {
+                                    <option value="@tl.Id">@tl.TenTheLoai</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Thời lượng (phút)</label>
+                        <input type="number" name="ThoiLuong" class="form-control" min="1" value="90" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Năm sản xuất</label>
+                        <input type="number" name="NamSanXuat" class="form-control" value="@DateTime.Now.Year" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Đạo diễn</label>
+                        <input type="text" name="DaoDien" class="form-control" placeholder="Tên đạo diễn" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Diễn viên</label>
+                        <input type="text" name="DienVien" class="form-control" placeholder="Tên diễn viên" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Ngày khởi chiếu</label>
+                        <input type="date" name="NgayKhoiChieu" class="form-control"
+                               value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Trạng thái</label>
+                        <select name="TrangThai" class="form-select">
+                            <option value="DangChieu">Đang chiếu</option>
+                            <option value="SapChieu">Sắp chiếu</option>
+                            <option value="NgungChieu">Ngừng chiếu</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Mô tả phim</label>
+                        <textarea name="MoTa" class="form-control" rows="3"
+                                  placeholder="Nhập mô tả phim..."></textarea>
+                    </div>
+                    <div class="col-12 d-flex gap-2 justify-content-end">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Hủy
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Lưu phim
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

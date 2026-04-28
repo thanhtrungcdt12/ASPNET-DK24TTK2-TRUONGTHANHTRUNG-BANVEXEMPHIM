@@ -1,0 +1,115 @@
+@model List<BanVeXemPhim.Models.TheLoai>
+@{
+    ViewData["Title"] = "Quản lý Thể Loại";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 admin-sidebar">
+            <h6 class="text-muted px-3 mb-3 text-uppercase small">Quản trị hệ thống</h6>
+            <nav class="nav flex-column">
+                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+                <a class="nav-link" asp-controller="QuanLyPhim" asp-action="Index">
+                    <i class="fas fa-film me-2"></i>Quản lý Phim
+                </a>
+                <a class="nav-link" asp-controller="QuanLySuatChieu" asp-action="Index">
+                    <i class="fas fa-calendar-alt me-2"></i>Suất Chiếu
+                </a>
+                <a class="nav-link active" asp-controller="QuanLyTheLoai" asp-action="Index">
+                    <i class="fas fa-tags me-2"></i>Thể Loại
+                </a>
+                <a class="nav-link" asp-controller="QuanLyVe" asp-action="Index">
+                    <i class="fas fa-ticket-alt me-2"></i>Quản lý Vé
+                </a>
+                <hr style="border-color:#333" />
+                <a class="nav-link" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-home me-2"></i>Về trang chủ
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main -->
+        <div class="col-md-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">🏷️ Quản Lý Thể Loại</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemTheLoai">
+                    <i class="fas fa-plus me-1"></i>Thêm thể loại
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th style="width:80px">#</th>
+                                    <th>Tên thể loại</th>
+                                    <th style="width:150px">Số phim</th>
+                                    <th style="width:120px">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model == null || !Model.Any())
+                                {
+                                    <tr><td colspan="4" class="text-center text-muted py-4">Chưa có thể loại nào</td></tr>
+                                }
+                                else
+                                {
+                                    @for (int i = 0; i < Model.Count; i++)
+                                    {
+                                        var tl = Model[i];
+                                        <tr>
+                                            <td>@(i + 1)</td>
+                                            <td class="fw-bold">@tl.TenTheLoai</td>
+                                            <td><span class="badge bg-secondary">@tl.Phims.Count</span></td>
+                                            <td>
+                                                <form method="post" asp-action="Xoa" class="d-inline"
+                                                      onsubmit="return confirm('Xóa thể loại này?')">
+                                                    <input type="hidden" name="id" value="@tl.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Thể Loại -->
+<div class="modal fade" id="modalThemTheLoai" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:#1e1e1e;border:1px solid #333;color:#e5e5e5">
+            <div class="modal-header" style="border-color:#333">
+                <h5 class="modal-title">➕ Thêm Thể Loại</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-action="Them">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên thể loại</label>
+                        <input type="text" name="tenTheLoai" class="form-control"
+                               placeholder="VD: Khoa học viễn tưởng" required />
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-color:#333">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

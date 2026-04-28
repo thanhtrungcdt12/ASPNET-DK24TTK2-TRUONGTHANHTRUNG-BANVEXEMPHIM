@@ -1,0 +1,149 @@
+@model BanVeXemPhim.Models.SuatChieu
+@{
+    ViewData["Title"] = "Chọn Ghế";
+    var gheDaDat = ViewBag.GheDaDat as List<string> ?? new List<string>();
+    var ghes = Model.PhongChieu?.Ghes?.OrderBy(g => g.SoGhe).ToList() ?? new List<BanVeXemPhim.Models.Ghe>();
+    // Nhóm ghế theo hàng (ký tự đầu tiên)
+    var gheTheoHang = ghes.GroupBy(g => g.SoGhe[0]).OrderBy(g => g.Key);
+}
+
+<div class="container py-4">
+    <!-- Thông tin suất chiếu -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <div class="text-muted small">Phim</div>
+                    <div class="fw-bold">@Model.Phim?.TenPhim</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-muted small">Rạp</div>
+                    <div class="fw-bold">@Model.PhongChieu?.RapChieu?.TenRap</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-muted small">Ngày - Giờ</div>
+                    <div class="fw-bold">@Model.NgayChieu.ToString("dd/MM/yyyy") - @Model.GioChieu.ToString(@"hh\:mm")</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-muted small">Giá vé</div>
+                    <div class="fw-bold text-warning">@Model.GiaVe.ToString("N0") VNĐ/ghế</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sơ đồ ghế -->
+    <div class="seat-map mb-4">
+        <div class="screen-label">MÀN HÌNH</div>
+
+        @foreach (var hang in gheTheoHang)
+        {
+            <div class="seat-row">
+                @foreach (var ghe in hang.OrderBy(g => g.SoGhe))
+                {
+                    bool daDat = gheDaDat.Contains(ghe.SoGhe);
+                    string cssClass = daDat ? "seat seat-da-dat" :
+                                      ghe.LoaiGhe == "VIP" ? "seat seat-vip" : "seat seat-thuong";
+                    <button type="button"
+                            class="@cssClass"
+                            id="ghe-@ghe.SoGhe"
+                            data-so-ghe="@ghe.SoGhe"
+                            data-gia="@Model.GiaVe"
+                            onclick="chonGhe(this)"
+                            @(daDat ? "disabled" : "")
+                            title="@ghe.SoGhe @(ghe.LoaiGhe == "VIP" ? "(VIP)" : "") @(daDat ? "- Đã đặt" : "")">
+                        @ghe.SoGhe
+                    </button>
+                }
+            </div>
+        }
+
+        <!-- Chú thích -->
+        <div class="seat-legend">
+            <div class="legend-item">
+                <div class="legend-box" style="background:#2a6049"></div>
+                <span>Ghế thường</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#7b4f00"></div>
+                <span>Ghế VIP</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#555"></div>
+                <span>Đã đặt</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#e50914"></div>
+                <span>Đang chọn</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin đã chọn & nút xác nhận -->
+    <div class="card">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <p class="mb-1">Ghế đã chọn: <strong id="danhSachGheHienThi">Chưa chọn ghế</strong></p>
+                    <p class="mb-0">Tổng tiền: <strong class="text-warning" id="tongTien">0 VNĐ</strong></p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <form id="formDatVe" method="post" asp-controller="DatVe" asp-action="XacNhan">
+                        <input type="hidden" name="suatChieuId" value="@Model.Id" />
+                        <input type="hidden" name="soGheChon" id="soGheChon" />
+                        <button type="submit" id="btnDatVe" class="btn btn-primary btn-lg" disabled>
+                            <i class="fas fa-ticket-alt me-2"></i>Xác nhận đặt vé
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let gheChon = [];
+    const giaVe = @Model.GiaVe;
+
+    function chonGhe(btn) {
+        const soGhe = btn.dataset.soGhe;
+        if (gheChon.includes(soGhe)) {
+            gheChon = gheChon.filter(g => g !== soGhe);
+            // Khôi phục màu gốc
+            if (btn.classList.contains('seat-da-dat')) return;
+            const isVip = btn.title.includes('VIP');
+            btn.classList.remove('seat-dang-chon');
+            btn.classList.add(isVip ? 'seat-vip' : 'seat-thuong');
+        } else {
+            gheChon.push(soGhe);
+            btn.classList.remove('seat-thuong', 'seat-vip');
+            btn.classList.add('seat-dang-chon');
+        }
+        capNhatThongTin();
+    }
+
+    function capNhatThongTin() {
+        if (gheChon.length === 0) {
+            document.getElementById('danhSachGheHienThi').textContent = 'Chưa chọn ghế';
+            document.getElementById('tongTien').textContent = '0 VNĐ';
+            document.getElementById('btnDatVe').disabled = true;
+            document.getElementById('soGheChon').value = '';
+        } else {
+            document.getElementById('danhSachGheHienThi').textContent = gheChon.join(', ');
+            const tong = gheChon.length * giaVe;
+            document.getElementById('tongTien').textContent = tong.toLocaleString('vi-VN') + ' VNĐ';
+            document.getElementById('btnDatVe').disabled = false;
+            document.getElementById('soGheChon').value = gheChon.join(',');
+        }
+    }
+
+    document.getElementById('formDatVe').onsubmit = function() {
+        if (gheChon.length === 0) {
+            alert('Vui lòng chọn ít nhất 1 ghế!');
+            return false;
+        }
+        return confirm(`Xác nhận đặt ${gheChon.length} ghế: ${gheChon.join(', ')}\nTổng tiền: ${(gheChon.length * giaVe).toLocaleString('vi-VN')} VNĐ?`);
+    };
+</script>
+}

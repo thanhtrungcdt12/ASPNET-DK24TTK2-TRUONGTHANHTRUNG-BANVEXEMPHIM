@@ -1,0 +1,111 @@
+@{
+    ViewData["Title"] = "Quản Trị";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 admin-sidebar">
+            <h6 class="text-muted px-3 mb-3 text-uppercase small">Quản trị hệ thống</h6>
+            <nav class="nav flex-column">
+                <a class="nav-link active" asp-controller="Dashboard" asp-action="Index">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+                <a class="nav-link" asp-controller="QuanLyPhim" asp-action="Index">
+                    <i class="fas fa-film me-2"></i>Quản lý Phim
+                </a>
+                <a class="nav-link" asp-controller="QuanLySuatChieu" asp-action="Index">
+                    <i class="fas fa-calendar-alt me-2"></i>Suất Chiếu
+                </a>
+                <a class="nav-link" asp-controller="QuanLyTheLoai" asp-action="Index">
+                    <i class="fas fa-tags me-2"></i>Thể Loại
+                </a>
+                <a class="nav-link" asp-controller="QuanLyVe" asp-action="Index">
+                    <i class="fas fa-ticket-alt me-2"></i>Quản lý Vé
+                </a>
+                <hr style="border-color:#333" />
+                <a class="nav-link" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-home me-2"></i>Về trang chủ
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main -->
+        <div class="col-md-10">
+            <h2 class="fw-bold mb-4">📊 Dashboard</h2>
+
+            <!-- Thống kê -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon text-primary">🎬</div>
+                        <div class="stat-number">@ViewBag.TongPhim</div>
+                        <div class="stat-label">Tổng phim</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">🎟️</div>
+                        <div class="stat-number">@ViewBag.TongVe</div>
+                        <div class="stat-label">Tổng vé đã bán</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-number">@ViewBag.TongKhachHang</div>
+                        <div class="stat-label">Khách hàng</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon text-warning">💰</div>
+                        <div class="stat-number" style="font-size:1.4rem">
+                            @(((decimal)ViewBag.DoanhThu).ToString("N0"))
+                        </div>
+                        <div class="stat-label">Doanh thu (VNĐ)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vé mới nhất -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-history me-2"></i>5 vé đặt gần nhất
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Mã vé</th>
+                                    <th>Khách hàng</th>
+                                    <th>Phim</th>
+                                    <th>Ghế</th>
+                                    <th>Giá</th>
+                                    <th>Ngày đặt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.VeMoiNhat is List<BanVeXemPhim.Models.Ve> veList)
+                                {
+                                    foreach (var ve in veList)
+                                    {
+                                        <tr>
+                                            <td><code>@ve.MaVe</code></td>
+                                            <td>@ve.KhachHang?.HoTen</td>
+                                            <td>@ve.SuatChieu?.Phim?.TenPhim</td>
+                                            <td>@ve.SoGhe</td>
+                                            <td class="text-warning">@ve.GiaTien.ToString("N0")</td>
+                                            <td>@ve.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
