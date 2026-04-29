@@ -180,6 +180,247 @@ namespace BanVeXemPhim.Controllers
         }
     }
 
+    // Controller quản lý Rạp Chiếu (Admin)
+    public class QuanLyRapController : Controller
+    {
+        private readonly ApplicationDbContext _db;
+        public QuanLyRapController(ApplicationDbContext db) { _db = db; }
+
+        private bool IsAdmin() => HttpContext.Session.GetString("UserRole") == "Admin";
+
+        public async Task<IActionResult> Index()
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            var raps = await _db.RapChieus.Include(r => r.PhongChieus).ToListAsync();
+            return View(raps);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Them(RapChieu rap)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            if (ModelState.IsValid)
+            {
+                _db.RapChieus.Add(rap);
+                await _db.SaveChangesAsync();
+                TempData["Success"] = "Thêm rạp thành công!";
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Sua(RapChieu rap)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            if (ModelState.IsValid)
+            {
+                _db.RapChieus.Update(rap);
+                await _db.SaveChangesAsync();
+                TempData["Success"] = "Cập nhật rạp thành công!";
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Xoa(int id)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            var rap = await _db.RapChieus.FindAsync(id);
+            if (rap != null)
+            {
+                _db.RapChieus.Remove(rap);
+                await _db.SaveChangesAsync();
+                TempData["Success"] = "Xóa rạp thành công!";
+            }
+            return RedirectToAction("Index");
+        }
+    }
+
+    // Controller quản lý Phòng Chiếu (Admin)
+    public class QuanLyPhongController : Controller
+    {
+        private readonly ApplicationDbContext _db;
+        public QuanLyPhongController(ApplicationDbContext db) { _db = db; }
+
+        private bool IsAdmin() => HttpContext.Session.GetString("UserRole") == "Admin";
+
+        public async Task<IActionResult> Index()
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            ViewBag.RapChieus = await _db.RapChieus.ToListAsync();
+            var phongs = await _db.PhongChieus
+                .Include(p => p.RapChieu)
+                .OrderBy(p => p.RapChieuId).ThenBy(p => p.TenPhong)
+                .ToListAsync();
+            return View(phongs);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Them(PhongChieu phong)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            _db.PhongChieus.Add(phong);
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Thêm phòng thành công!";
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Sua(PhongChieu phong)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            _db.PhongChieus.Update(phong);
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Cập nhật phòng thành công!";
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Xoa(int id)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            var phong = await _db.PhongChieus.FindAsync(id);
+            if (phong != null)
+            {
+                _db.PhongChieus.Remove(phong);
+                await _db.SaveChangesAsync();
+                TempData["Success"] = "Xóa phòng thành công!";
+            }
+            return RedirectToAction("Index");
+        }
+    }
+
+    // Controller quản lý Ghế (Admin)
+    public class QuanLyGheController : Controller
+    {
+        private readonly ApplicationDbContext _db;
+        public QuanLyGheController(ApplicationDbContext db) { _db = db; }
+
+        private bool IsAdmin() => HttpContext.Session.GetString("UserRole") == "Admin";
+
+        public async Task<IActionResult> Index(int? phongChieuId)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            ViewBag.PhongChieus = await _db.PhongChieus.Include(p => p.RapChieu).ToListAsync();
+            ViewBag.PhongChieuId = phongChieuId;
+
+            var query = _db.Ghes.Include(g => g.PhongChieu).ThenInclude(p => p!.RapChieu).AsQueryable();
+            if (phongChieuId.HasValue)
+                query = query.Where(g => g.PhongChieuId == phongChieuId.Value);
+
+            var ghes = await query.OrderBy(g => g.PhongChieuId).ThenBy(g => g.SoGhe).ToListAsync();
+            return View(ghes);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Them(Ghe ghe)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            _db.Ghes.Add(ghe);
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Thêm ghế thành công!";
+            return RedirectToAction("Index", new { phongChieuId = ghe.PhongChieuId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Sua(Ghe ghe)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            _db.Ghes.Update(ghe);
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Cập nhật ghế thành công!";
+            return RedirectToAction("Index", new { phongChieuId = ghe.PhongChieuId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Xoa(int id)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            var ghe = await _db.Ghes.FindAsync(id);
+            int? phongId = ghe?.PhongChieuId;
+            if (ghe != null)
+            {
+                _db.Ghes.Remove(ghe);
+                await _db.SaveChangesAsync();
+                TempData["Success"] = "Xóa ghế thành công!";
+            }
+            return RedirectToAction("Index", new { phongChieuId = phongId });
+        }
+    }
+
+    // Controller quản lý Tài Khoản (Admin)
+    public class QuanLyTaiKhoanController : Controller
+    {
+        private readonly ApplicationDbContext _db;
+        public QuanLyTaiKhoanController(ApplicationDbContext db) { _db = db; }
+
+        private bool IsAdmin() => HttpContext.Session.GetString("UserRole") == "Admin";
+
+        public async Task<IActionResult> Index()
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            var khachHangs = await _db.KhachHangs.OrderBy(k => k.Id).ToListAsync();
+            return View(khachHangs);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Them(KhachHang kh)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            if (await _db.KhachHangs.AnyAsync(k => k.Email == kh.Email))
+            {
+                TempData["Error"] = "Email này đã được đăng ký!";
+                return RedirectToAction("Index");
+            }
+            kh.NgayTao = DateTime.Now;
+            _db.KhachHangs.Add(kh);
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Thêm tài khoản thành công!";
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Sua(int id, string hoTen, string email, string? matKhau, string? soDienThoai, string vaiTro)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+            var kh = await _db.KhachHangs.FindAsync(id);
+            if (kh == null) return RedirectToAction("Index");
+
+            kh.HoTen = hoTen;
+            kh.Email = email;
+            kh.SoDienThoai = soDienThoai;
+            kh.VaiTro = vaiTro;
+            // Chỉ đổi mật khẩu khi admin nhập mật khẩu mới
+            if (!string.IsNullOrWhiteSpace(matKhau)) kh.MatKhau = matKhau;
+
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Cập nhật tài khoản thành công!";
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Xoa(int id)
+        {
+            if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
+
+            // Không cho admin xóa chính tài khoản đang đăng nhập
+            if (HttpContext.Session.GetString("UserId") == id.ToString())
+            {
+                TempData["Error"] = "Không thể xóa tài khoản đang đăng nhập!";
+                return RedirectToAction("Index");
+            }
+
+            var kh = await _db.KhachHangs.FindAsync(id);
+            if (kh != null)
+            {
+                _db.KhachHangs.Remove(kh);
+                await _db.SaveChangesAsync();
+                TempData["Success"] = "Xóa tài khoản thành công!";
+            }
+            return RedirectToAction("Index");
+        }
+    }
+
     // Controller quản lý Thể Loại (Admin)
     public class QuanLyTheLoaiController : Controller
     {
@@ -191,7 +432,7 @@ namespace BanVeXemPhim.Controllers
         public async Task<IActionResult> Index()
         {
             if (!IsAdmin()) return RedirectToAction("DangNhap", "Account");
-            return View(await _db.TheLoais.ToListAsync());
+            return View(await _db.TheLoais.Include(t => t.Phims).ToListAsync());
         }
 
         [HttpPost]

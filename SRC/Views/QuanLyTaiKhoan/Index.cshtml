@@ -1,0 +1,188 @@
+@model List<BanVeXemPhim.Models.KhachHang>
+@{
+    ViewData["Title"] = "Quản lý Tài Khoản";
+    ViewBag.AdminActive = "TaiKhoan";
+    var currentUserId = Context.Session.GetString("UserId");
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        @await Html.PartialAsync("_AdminSidebar")
+
+        <div class="col-md-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">👥 Quản Lý Tài Khoản</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemTaiKhoan">
+                    <i class="fas fa-plus me-1"></i>Thêm tài khoản
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th style="width:60px">#</th>
+                                    <th>Họ tên</th>
+                                    <th>Email</th>
+                                    <th>SĐT</th>
+                                    <th style="width:110px">Vai trò</th>
+                                    <th style="width:140px">Ngày tạo</th>
+                                    <th style="width:140px">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model == null || !Model.Any())
+                                {
+                                    <tr><td colspan="7" class="text-center text-muted py-4">Chưa có tài khoản nào</td></tr>
+                                }
+                                else
+                                {
+                                    @for (int i = 0; i < Model.Count; i++)
+                                    {
+                                        var k = Model[i];
+                                        var isCurrent = currentUserId == k.Id.ToString();
+                                        <tr>
+                                            <td>@(i + 1)</td>
+                                            <td class="fw-bold">
+                                                @k.HoTen
+                                                @if (isCurrent)
+                                                { <span class="badge bg-info text-dark ms-1">Bạn</span> }
+                                            </td>
+                                            <td>@k.Email</td>
+                                            <td>@k.SoDienThoai</td>
+                                            <td>
+                                                @if (k.VaiTro == "Admin")
+                                                { <span class="badge bg-danger">Admin</span> }
+                                                else
+                                                { <span class="badge bg-secondary">User</span> }
+                                            </td>
+                                            <td>@k.NgayTao.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-warning me-1"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalSuaTaiKhoan-@k.Id">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                @if (!isCurrent)
+                                                {
+                                                    <form method="post" asp-action="Xoa" class="d-inline"
+                                                          onsubmit="return confirm('Xóa tài khoản @k.HoTen?')">
+                                                        <input type="hidden" name="id" value="@k.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Tài Khoản -->
+<div class="modal fade" id="modalThemTaiKhoan" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:#1e1e1e;border:1px solid #333;color:#e5e5e5">
+            <div class="modal-header" style="border-color:#333">
+                <h5 class="modal-title">➕ Thêm Tài Khoản</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-action="Them">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Họ tên <span class="text-danger">*</span></label>
+                        <input type="text" name="HoTen" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email <span class="text-danger">*</span></label>
+                        <input type="email" name="Email" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                        <input type="text" name="MatKhau" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="text" name="SoDienThoai" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Vai trò</label>
+                        <select name="VaiTro" class="form-select">
+                            <option value="User">User</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-color:#333">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa Tài Khoản -->
+@if (Model != null)
+{
+    foreach (var k in Model)
+    {
+        <div class="modal fade" id="modalSuaTaiKhoan-@k.Id" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content" style="background:#1e1e1e;border:1px solid #333;color:#e5e5e5">
+                    <div class="modal-header" style="border-color:#333">
+                        <h5 class="modal-title">✏️ Sửa Tài Khoản</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="post" asp-action="Sua">
+                        <input type="hidden" name="id" value="@k.Id" />
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Họ tên</label>
+                                <input type="text" name="hoTen" class="form-control" required value="@k.HoTen" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" required value="@k.Email" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mật khẩu mới
+                                    <small class="text-muted">(để trống nếu giữ nguyên)</small>
+                                </label>
+                                <input type="text" name="matKhau" class="form-control" placeholder="••••••••" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="text" name="soDienThoai" class="form-control" value="@k.SoDienThoai" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Vai trò</label>
+                                <select name="vaiTro" class="form-select">
+                                    <option value="User" selected="@(k.VaiTro == "User")">User</option>
+                                    <option value="Admin" selected="@(k.VaiTro == "Admin")">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="border-color:#333">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Cập nhật
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+}

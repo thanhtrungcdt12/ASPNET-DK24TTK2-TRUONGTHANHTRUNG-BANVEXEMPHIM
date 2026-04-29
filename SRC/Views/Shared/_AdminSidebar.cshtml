@@ -1,0 +1,40 @@
+@{
+    var active = ViewBag.AdminActive as string ?? "";
+    string Cls(string key) => active == key ? "nav-link active" : "nav-link";
+}
+<div class="col-md-2 admin-sidebar">
+    <h6 class="text-muted px-3 mb-3 text-uppercase small">Quản trị hệ thống</h6>
+    <nav class="nav flex-column">
+        <a class="@Cls("Dashboard")" asp-controller="Dashboard" asp-action="Index">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+        <a class="@Cls("Phim")" asp-controller="QuanLyPhim" asp-action="Index">
+            <i class="fas fa-film me-2"></i>Quản lý Phim
+        </a>
+        <a class="@Cls("TheLoai")" asp-controller="QuanLyTheLoai" asp-action="Index">
+            <i class="fas fa-tags me-2"></i>Thể Loại
+        </a>
+        <a class="@Cls("Rap")" asp-controller="QuanLyRap" asp-action="Index">
+            <i class="fas fa-building me-2"></i>Rạp Chiếu
+        </a>
+        <a class="@Cls("Phong")" asp-controller="QuanLyPhong" asp-action="Index">
+            <i class="fas fa-door-open me-2"></i>Phòng Chiếu
+        </a>
+        <a class="@Cls("Ghe")" asp-controller="QuanLyGhe" asp-action="Index">
+            <i class="fas fa-couch me-2"></i>Ghế
+        </a>
+        <a class="@Cls("SuatChieu")" asp-controller="QuanLySuatChieu" asp-action="Index">
+            <i class="fas fa-calendar-alt me-2"></i>Suất Chiếu
+        </a>
+        <a class="@Cls("Ve")" asp-controller="QuanLyVe" asp-action="Index">
+            <i class="fas fa-ticket-alt me-2"></i>Quản lý Vé
+        </a>
+        <a class="@Cls("TaiKhoan")" asp-controller="QuanLyTaiKhoan" asp-action="Index">
+            <i class="fas fa-users me-2"></i>Tài Khoản
+        </a>
+        <hr style="border-color:#333" />
+        <a class="nav-link" asp-controller="Home" asp-action="Index">
+            <i class="fas fa-home me-2"></i>Về trang chủ
+        </a>
+    </nav>
+</div>

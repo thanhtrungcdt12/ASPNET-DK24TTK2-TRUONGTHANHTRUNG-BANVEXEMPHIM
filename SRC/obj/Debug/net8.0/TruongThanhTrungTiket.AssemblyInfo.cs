@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TruongThanhTrungTiket")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+db46c529c7f68dfa21879fd36d497b6289728d4a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+41f3c12038675a5a6502f2c6e05d797cad6f6103")]
 [assembly: System.Reflection.AssemblyProductAttribute("TruongThanhTrungTiket")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TruongThanhTrungTiket")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

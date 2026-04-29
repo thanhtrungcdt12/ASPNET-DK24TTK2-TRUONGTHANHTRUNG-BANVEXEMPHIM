@@ -1,0 +1,157 @@
+@model List<BanVeXemPhim.Models.PhongChieu>
+@{
+    ViewData["Title"] = "Quản lý Phòng Chiếu";
+    ViewBag.AdminActive = "Phong";
+    var raps = ViewBag.RapChieus as List<BanVeXemPhim.Models.RapChieu> ?? new();
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        @await Html.PartialAsync("_AdminSidebar")
+
+        <div class="col-md-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">🚪 Quản Lý Phòng Chiếu</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemPhong"
+                        @(raps.Any() ? "" : "disabled title='Hãy thêm rạp trước khi thêm phòng'")>
+                    <i class="fas fa-plus me-1"></i>Thêm phòng
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th style="width:60px">#</th>
+                                    <th>Rạp chiếu</th>
+                                    <th>Tên phòng</th>
+                                    <th style="width:120px">Số ghế</th>
+                                    <th style="width:140px">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model == null || !Model.Any())
+                                {
+                                    <tr><td colspan="5" class="text-center text-muted py-4">Chưa có phòng nào</td></tr>
+                                }
+                                else
+                                {
+                                    @for (int i = 0; i < Model.Count; i++)
+                                    {
+                                        var p = Model[i];
+                                        <tr>
+                                            <td>@(i + 1)</td>
+                                            <td>@p.RapChieu?.TenRap</td>
+                                            <td class="fw-bold">@p.TenPhong</td>
+                                            <td><span class="badge bg-info text-dark">@p.SoGhe</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-warning me-1"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalSuaPhong-@p.Id">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <form method="post" asp-action="Xoa" class="d-inline"
+                                                      onsubmit="return confirm('Xóa phòng @p.TenPhong?')">
+                                                    <input type="hidden" name="id" value="@p.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Phòng -->
+<div class="modal fade" id="modalThemPhong" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:#1e1e1e;border:1px solid #333;color:#e5e5e5">
+            <div class="modal-header" style="border-color:#333">
+                <h5 class="modal-title">➕ Thêm Phòng Chiếu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-action="Them">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Rạp chiếu <span class="text-danger">*</span></label>
+                        <select name="RapChieuId" class="form-select" required>
+                            <option value="">-- Chọn rạp --</option>
+                            @foreach (var r in raps)
+                            { <option value="@r.Id">@r.TenRap</option> }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tên phòng <span class="text-danger">*</span></label>
+                        <input type="text" name="TenPhong" class="form-control" required placeholder="VD: Phòng 1" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số ghế</label>
+                        <input type="number" name="SoGhe" class="form-control" min="1" value="50" />
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-color:#333">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa Phòng -->
+@if (Model != null)
+{
+    foreach (var p in Model)
+    {
+        <div class="modal fade" id="modalSuaPhong-@p.Id" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content" style="background:#1e1e1e;border:1px solid #333;color:#e5e5e5">
+                    <div class="modal-header" style="border-color:#333">
+                        <h5 class="modal-title">✏️ Sửa Phòng Chiếu</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="post" asp-action="Sua">
+                        <input type="hidden" name="Id" value="@p.Id" />
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Rạp chiếu</label>
+                                <select name="RapChieuId" class="form-select" required>
+                                    @foreach (var r in raps)
+                                    {
+                                        <option value="@r.Id" selected="@(p.RapChieuId == r.Id)">@r.TenRap</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Tên phòng</label>
+                                <input type="text" name="TenPhong" class="form-control" required value="@p.TenPhong" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Số ghế</label>
+                                <input type="number" name="SoGhe" class="form-control" min="1" value="@p.SoGhe" />
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="border-color:#333">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Cập nhật
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+}
