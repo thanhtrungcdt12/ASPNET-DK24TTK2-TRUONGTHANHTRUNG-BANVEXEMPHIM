@@ -18,8 +18,12 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Khôi phục database từ TruongThanhTrungTiket.bak nếu chưa tồn tại
-DbInitializer.RestoreFromBackup(app.Environment.ContentRootPath);
+// Có .bak: khôi phục từ backup. Không có: tạo DB code-first và seed dữ liệu mẫu.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    DbInitializer.Initialize(app.Environment.ContentRootPath, db);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
